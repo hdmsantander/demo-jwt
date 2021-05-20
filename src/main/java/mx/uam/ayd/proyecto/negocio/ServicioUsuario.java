@@ -3,6 +3,8 @@ package mx.uam.ayd.proyecto.negocio;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ public class ServicioUsuario {
 	@Autowired
 	private GrupoRepository grupoRepository;
 	
+	
 	/**
 	 * 
 	 * Permite agregar un usuario
@@ -31,7 +34,7 @@ public class ServicioUsuario {
 	 * @param grupo
 	 * @return
 	 */
-	public void agregaUsuario(String nombre, String apellido, String nombreGrupo) {
+	public Usuario agregaUsuario(String nombre, String apellido, String nombreGrupo) {
 		
 		// Regla de negocio: No se permite agregar dos usuarios con el mismo nombre y apellido
 		
@@ -54,13 +57,14 @@ public class ServicioUsuario {
 		usuario.setNombre(nombre);
 		usuario.setApellido(apellido);
 		
-		usuarioRepository.save(usuario);
+		//usuarioRepository.save(usuario);
 		
 		grupo.addUsuario(usuario);
 		
 		
 		grupoRepository.save(grupo);
 		
+		return usuario;
 
 	}
 
@@ -71,8 +75,7 @@ public class ServicioUsuario {
 	 */
 	public List <Usuario> recuperaUsuarios() {
 
-		
-		System.out.println("usuarioRepository = "+usuarioRepository);
+		log.info("usuarioRepository = "+usuarioRepository);
 		
 		List <Usuario> usuarios = new ArrayList<>();
 		

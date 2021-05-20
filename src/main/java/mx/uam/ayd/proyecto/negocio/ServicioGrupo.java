@@ -25,7 +25,6 @@ public class ServicioGrupo {
 	public List <Grupo> recuperaGrupos() {
 
 		
-		
 		List <Grupo> grupos = new ArrayList<>();
 		
 		for(Grupo grupo:grupoRepository.findAll()) {
