@@ -13,8 +13,10 @@
     var matricula;
 
     // obtiene el valor de la matricula del campo
-    matricula = document.getElementById("matricula").value;
+    nombre = document.forms["formAgregarUsuario"]["nombre"];
 
+    console.log("Nombre "+nombre);
+    
     // Valida el rango del valor
     	var xmlhttp = new XMLHttpRequest();
 	    xmlhttp.onreadystatechange = function() {
@@ -23,12 +25,17 @@
         	}
     	};
     	
-    	var usuario = '{"nombre":"JSON","apellido":"Java","grupo":1}';
+    	// TODO: Agregar el contenido de la forma
+    	var usuario = '{"nombre":"Juan","apellido":"Java","edad":99, "grupo":1}';
     	
     	var usuarioJSON = JSON.parse(usuario);
     	
-    	xmlhttp.open("POST", "usuarios", true);
-    	xmlhttp.send(usuarioJSON);
+    	console.log("Enviando: "+usuario);
+    	
+    	xmlhttp.open("POST", "v1/usuarios", true);
+    	xmlhttp.setRequestHeader("accept","application/json");
+    	xmlhttp.setRequestHeader("Content-Type","application/json;charset=utf-8");
+    	xmlhttp.send(usuario);
  
 }
 </script>
@@ -41,7 +48,7 @@
 	    <input type = "text" name = "apellido"><br>
 	    <label for="grupo">Grupo:</label>
 	    <input type = "text" name = "grupo"><br>
-	    <input type="submit" value="Aceptar" onclick="procesaForma()">
+	    <input type="button" value="Aceptar" onclick="procesaForma()">
 	</form>
  </body>
 </html>
