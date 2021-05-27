@@ -1,6 +1,7 @@
 package mx.uam.ayd.proyecto.servicios;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -11,11 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 import org.springframework.http.ResponseEntity;
 
@@ -24,15 +27,17 @@ import mx.uam.ayd.proyecto.dto.UsuarioDto;
 import mx.uam.ayd.proyecto.negocio.ServicioUsuario;
 
 import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
+import mx.uam.ayd.proyecto.seguridad.ServicioSeguridad;
 
 @RestController
 @RequestMapping("/v1") // Versionamiento
-@Slf4j 
 public class UsuarioRestController {
 
 	@Autowired
 	private ServicioUsuario servicioUsuarios;
 	
+	@Autowired
+	private ServicioSeguridad servicioSeguridad;
 	
 	/**
 	 * Permite recuperar todos los usuarios
@@ -89,11 +94,33 @@ public class UsuarioRestController {
 	 * @return
 	 */
 	@GetMapping(path = "/usuarios/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity <?> retrieve(@PathVariable("id") Long id) {
+	public ResponseEntity <?> retrieve(@PathVariable("id") UUID id,
+			@ApiParam(name = "Authorization", value = "Bearer token", example = ServicioSeguridad.EJEMPLO_HEADER_AUTORIZACION, required = true) @RequestHeader(value = "Authorization", name = "Authorization", required = true) String authorization) {
 		
-		log.info("Recuperando el usuario con id: "+id);
+		try {
+			
+			// Revisamos si es un JWT válido para esta petición, quitamos la parte de bearer del header para tener solo el JWT
+			if (servicioSeguridad.jwtEsValido(authorization.replace("Bearer ", ""))) {
+				
+				// Obtenemos el UUID que viene en el JWT, quitamos la parte de bearer del header para tener solo el JWT
+				UUID uuid = servicioSeguridad.obtenUuidDeJwt(authorization.replace("Bearer ", ""));
+				
+				// Comparamos el UUID solicitado al controlador con el que viene en el token
+				// solo aceptamos peticiones para el usuario del token, si esta UUID
+				// es la misma y el usuario existe, regresamos el usuario
+				if (id.equals(uuid) && servicioUsuarios.recuperaUsuario(uuid).isPresent()) {
+					return ResponseEntity.status(HttpStatus.CREATED).body(servicioUsuarios.recuperaUsuario(uuid).get());
+				}
+				
+			}
+			
+			// Cualquier otro caso, regresamos un no autorizado
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+		}
 		
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No encontré el usuario");
 	}
 
 }

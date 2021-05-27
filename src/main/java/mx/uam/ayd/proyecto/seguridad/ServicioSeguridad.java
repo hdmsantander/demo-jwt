@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 
 import mx.uam.ayd.proyecto.datos.UsuarioRepository;
 import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
@@ -66,5 +67,24 @@ public class ServicioSeguridad {
 				.sign(servicioAlgoritmo.getAlgoritmo());
 
 	}
+	
+	public Boolean jwtEsValido(String headerAutorizacion) {
+		
+		// Creamos un verificador de JWT con el algoritmo que usamos para crearlos
+		JWTVerifier verifier = JWT.require(servicioAlgoritmo.getAlgoritmo()).build();
+		
+		// Si no se arrojó una excepción el objeto será diferente de nulo
+		return verifier.verify(headerAutorizacion) != null;
+	}
 
+	public UUID obtenUuidDeJwt(String headerAutorizacion) {
+		
+		// Creamos un verificador de JWT con el algoritmo que usamos para crearlos
+		JWTVerifier verifier = JWT.require(servicioAlgoritmo.getAlgoritmo()).build();
+		
+		// Si no se arrojó una excepción el objeto será diferente de nulo y podremos obtener
+		// el claim subject que tiene el UUID del usuario
+		return UUID.fromString(verifier.verify(headerAutorizacion).getSubject());
+		
+	}
 }

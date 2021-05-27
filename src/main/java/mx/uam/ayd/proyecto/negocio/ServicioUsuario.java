@@ -3,6 +3,7 @@ package mx.uam.ayd.proyecto.negocio;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.transaction.Transactional;
 
@@ -91,6 +92,8 @@ public class ServicioUsuario {
 		return usuarios;
 	}
 
-	
+	public Optional<Usuario> recuperaUsuario(UUID id) {
+		return usuarioRepository.findById(id);
+	}
 	
 }

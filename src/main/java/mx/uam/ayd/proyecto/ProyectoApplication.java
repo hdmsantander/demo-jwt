@@ -87,7 +87,8 @@ public class ProyectoApplication {
 		usuario.setNombre("fabian");
 		usuario.setApellido("santander");
 		usuario.setEdad(27);
-		usuarioRepository.save(usuario);
+		usuario = usuarioRepository.save(usuario);
+		System.out.println(servicioSeguridad.generaTokenUsuario(usuario.getId()));
 						
 	}
 }
