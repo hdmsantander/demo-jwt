@@ -109,7 +109,7 @@ public class UsuarioRestController {
 				// solo aceptamos peticiones para el usuario del token, si esta UUID
 				// es la misma y el usuario existe, regresamos el usuario
 				if (id.equals(uuid) && servicioUsuarios.recuperaUsuario(uuid).isPresent()) {
-					return ResponseEntity.status(HttpStatus.CREATED).body(servicioUsuarios.recuperaUsuario(uuid).get());
+					return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioDto.creaDto(servicioUsuarios.recuperaUsuario(uuid).get()));
 				}
 				
 			}
