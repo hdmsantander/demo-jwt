@@ -7,7 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import mx.uam.ayd.proyecto.datos.GrupoRepository;
+import mx.uam.ayd.proyecto.datos.UsuarioRepository;
 import mx.uam.ayd.proyecto.negocio.modelo.Grupo;
+import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
+import mx.uam.ayd.proyecto.seguridad.ServicioSeguridad;
 
 /**
  * 
@@ -26,6 +29,12 @@ public class ProyectoApplication {
 	
 	@Autowired
 	GrupoRepository grupoRepository;
+	
+	@Autowired
+	UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	ServicioSeguridad servicioSeguridad;
 	
 	/**
 	 * 
@@ -72,6 +81,13 @@ public class ProyectoApplication {
 		Grupo grupoOps = new Grupo();
 		grupoOps.setNombre("Operadores");
 		grupoRepository.save(grupoOps);
-				
+		
+		Usuario usuario = new Usuario();
+		usuario.setGrupo(grupoAdmin);
+		usuario.setNombre("fabian");
+		usuario.setApellido("santander");
+		usuario.setEdad(27);
+		usuarioRepository.save(usuario);
+						
 	}
 }
