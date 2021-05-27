@@ -2,6 +2,8 @@ package mx.uam.ayd.proyecto.servicios;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import io.swagger.annotations.ApiOperation;
+
 import org.springframework.http.ResponseEntity;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +54,12 @@ public class UsuarioRestController {
 	 * @param nuevoUsuario
 	 * @return
 	 */
+	@ApiOperation(
+			value = "Crear usuario",
+			notes = "Permite crear un nuevo usuario"
+			) // Documentacion del api
 	@PostMapping(path = "/usuarios", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UsuarioDto> create(@RequestBody UsuarioDto nuevoUsuario) {
+	public ResponseEntity<UsuarioDto> create(@RequestBody @Valid UsuarioDto nuevoUsuario) {
 		
 		try {
 		
