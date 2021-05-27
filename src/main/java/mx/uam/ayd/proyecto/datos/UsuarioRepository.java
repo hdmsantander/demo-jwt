@@ -1,6 +1,7 @@
 package mx.uam.ayd.proyecto.datos;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -13,7 +14,7 @@ import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
  * @author humbertocervantes
  *
  */
-public interface UsuarioRepository extends CrudRepository <Usuario, Long> {
+public interface UsuarioRepository extends CrudRepository <Usuario, UUID> {
 	
 	public Usuario findByNombreAndApellido(String nombre, String apellido);
 	
