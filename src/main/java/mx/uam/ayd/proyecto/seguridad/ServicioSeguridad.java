@@ -3,6 +3,9 @@ package mx.uam.ayd.proyecto.seguridad;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -10,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 
+import mx.uam.ayd.proyecto.datos.RefreshTokenRepository;
 import mx.uam.ayd.proyecto.datos.UsuarioRepository;
+import mx.uam.ayd.proyecto.negocio.modelo.RefreshToken;
 import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
 
 @Service
@@ -24,6 +29,9 @@ public class ServicioSeguridad {
 	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
 	
 	public static final String EJEMPLO_HEADER_AUTORIZACION = "Bearer aaaaaaa.bbbbbbb.ccccccc";
 	
@@ -39,7 +47,7 @@ public class ServicioSeguridad {
 		
 		// Tenemos el usuario al cual le vamos a generar el JWT
 		Usuario usuario = usuarioABuscar.get();
-		
+				
 		// Creamos el JWT y lo regresamos
 		return JWT.create()
 				
@@ -66,6 +74,34 @@ public class ServicioSeguridad {
 				// sobre el algoritmo (o reemplazarlo en pruebas)
 				.sign(servicioAlgoritmo.getAlgoritmo());
 
+	}
+	
+	@Transactional
+	public String generaRefreshTokenUsuario(UUID idUsuario) {
+		
+		// Buscamos el usuario con ese UUID en la base de datos
+		Optional<Usuario> usuarioABuscar = usuarioRepository.findById(idUsuario);
+		
+		// Si no encontramos el usuario con ese UUID, de una vez regresamos null
+		if (usuarioABuscar.isEmpty()) {
+			return null;
+		}
+		
+		// Tenemos el usuario al cual le vamos a generar el JWT
+		Usuario usuario = usuarioABuscar.get();
+		
+		// Le generamos su refresh token
+		RefreshToken refreshToken = new RefreshToken();
+		refreshToken.setIssuedAt(System.currentTimeMillis());
+		refreshToken.setExpireAt(System.currentTimeMillis() + 600000);
+		refreshToken = refreshTokenRepository.save(refreshToken);
+		
+		// Le agregamos el refresh token al usuario y lo guardamos
+		usuario.getRefreshTokens().add(refreshToken);		
+		usuarioRepository.save(usuario);
+		
+		return refreshToken.getId().toString();
+		
 	}
 	
 	public Boolean jwtEsValido(String headerAutorizacion) {
