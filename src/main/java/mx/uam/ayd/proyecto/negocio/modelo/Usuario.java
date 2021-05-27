@@ -1,5 +1,7 @@
 package mx.uam.ayd.proyecto.negocio.modelo;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,8 +20,8 @@ import lombok.Data;
 @Data
 public class Usuario {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long idUsuario;
+	@GeneratedValue
+	private UUID id;
 
 	private String nombre;
 	

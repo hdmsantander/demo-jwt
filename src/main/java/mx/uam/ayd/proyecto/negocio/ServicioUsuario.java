@@ -57,19 +57,17 @@ public class ServicioUsuario {
 		usuario = new Usuario();
 		usuario.setNombre(usuarioDto.getNombre());
 		usuario.setApellido(usuarioDto.getApellido());
+		usuario.setEdad(usuarioDto.getEdad());
 		
 		usuario.setGrupo(grupo);
 
 		usuario = usuarioRepository.save(usuario); // Regresa la versión con ID
 
-		
 		grupo.addUsuario(usuario);
-		
 		
 		grupoRepository.save(grupo);
 
-
-		usuarioDto.setIdUsuario(usuario.getIdUsuario());
+		usuarioDto.setId(usuario.getId().toString());
 
 		return usuarioDto;
 

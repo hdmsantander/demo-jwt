@@ -1,5 +1,7 @@
 package mx.uam.ayd.proyecto.dto;
 
+import java.util.UUID;
+
 import lombok.Data;
 import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
 
@@ -10,7 +12,7 @@ import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
 @Data
 public class UsuarioDto {
 	
-	private long idUsuario;
+	private String id;
 
 	private String nombre;
 	
@@ -29,7 +31,7 @@ public class UsuarioDto {
 	public static UsuarioDto creaDto(Usuario usuario) {
 		UsuarioDto dto = new UsuarioDto();
 
-		dto.setIdUsuario(usuario.getIdUsuario());
+		dto.setId(usuario.getId().toString());
 		dto.setNombre(usuario.getNombre());
 		dto.setApellido(usuario.getApellido());
 		dto.setEdad(usuario.getEdad());
