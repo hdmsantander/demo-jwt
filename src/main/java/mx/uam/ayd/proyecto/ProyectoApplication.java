@@ -7,8 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import mx.uam.ayd.proyecto.datos.GrupoRepository;
+import mx.uam.ayd.proyecto.datos.RefreshTokenRepository;
 import mx.uam.ayd.proyecto.datos.UsuarioRepository;
 import mx.uam.ayd.proyecto.negocio.modelo.Grupo;
+import mx.uam.ayd.proyecto.negocio.modelo.RefreshToken;
 import mx.uam.ayd.proyecto.negocio.modelo.Usuario;
 import mx.uam.ayd.proyecto.seguridad.ServicioSeguridad;
 
@@ -35,6 +37,9 @@ public class ProyectoApplication {
 	
 	@Autowired
 	ServicioSeguridad servicioSeguridad;
+	
+	@Autowired
+	RefreshTokenRepository refreshTokenRepository;
 	
 	/**
 	 * 
@@ -88,7 +93,15 @@ public class ProyectoApplication {
 		usuario.setApellido("santander");
 		usuario.setEdad(27);
 		usuario = usuarioRepository.save(usuario);
-		System.out.println(servicioSeguridad.generaTokenUsuario(usuario.getId()));
-						
+		
+		RefreshToken refreshToken = new RefreshToken();
+		refreshToken.setIssuedAt(System.currentTimeMillis());
+		refreshToken.setExpireAt(System.currentTimeMillis() + 600000);
+		refreshToken = refreshTokenRepository.save(refreshToken);
+		
+		// Le agregamos el refresh token al usuario y lo guardamos
+		usuario.getRefreshTokens().add(refreshToken);		
+		usuarioRepository.save(usuario);
+								
 	}
 }
