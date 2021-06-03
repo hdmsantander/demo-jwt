@@ -1,0 +1,83 @@
+# Esta acción publica un paquete de una aplicación Java en el repositorio de paquetes de Maven de GitHub
+
+# Nombre de esta acción
+name: Publish package to GitHub Packages
+
+# Esta acción es ejecutada cuando se hace una release en un proyecto
+on:
+  release:
+    types: [created]
+
+# Los trabajos en esta acción
+jobs:
+  
+  # Este trabajo prueba la aplicación antes de publicarla en GitHub
+  testing:
+    
+    # Se ejecuta en Ubuntu
+    # Para más información, ver: https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners
+    runs-on: ubuntu-latest
+    
+    # Los pasos de este trabajo
+    steps:
+    
+    # Baja una copia del repositorio al runner
+    - name: Checkout the repository into the runner
+      uses: actions/checkout@v2
+
+    # Configura el JDK 11 para x64
+    - name: Set up JDK 11 for a x64 architecture
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        architecture: x64
+
+    # Usa caché para que en el futuro la acción corra más rápido
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    # Prueba la aplicación usando Maven
+    - name: Test application with Maven
+      run: mvn -B test --file pom.xml
+  
+  publish:
+  
+    # Para poder ejecutar el trabajo, necesitamos primero el trabajo de pruebas, para no empaquetar aplicaciones con errores
+    # si no se especifica esta dependencia, los trabajos corren en paralelo
+    needs: [testing]
+    
+    # Corre en el runner de Ubuntu
+    # Para más información, ver: https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners
+    runs-on: ubuntu-latest
+    
+     # Los pasos de este trabajo
+    steps:
+    
+    # Baja una copia del repositorio al runner
+    - name: Checkout the repository into the runner
+      uses: actions/checkout@v2
+
+    # Configura el JDK 11 para x64
+    - name: Set up JDK 11 for a x64 architecture
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        architecture: x64
+
+    # Usa caché para que en el futuro la acción corra más rápido
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    # Haz deploy de el paquete compilado al repositorio de Maven de GitHub de este proyecto
+    - name: Publish package
+      run: mvn -B deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
