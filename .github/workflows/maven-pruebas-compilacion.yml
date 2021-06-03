@@ -1,0 +1,90 @@
+# Esta acción prueba, compila y empaqueta una aplicación Java
+# Para más información, ver: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+# El nombre de la acción
+name: Java application packaging with Maven
+
+# Las condiciones bajo las cuales esta acción se ejecuta
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Los trabajos de la acción
+jobs:
+  testing:
+    
+    # Corre en el runner de Ubuntu
+    # Para más info, ver: https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners
+    runs-on: ubuntu-latest
+    
+    # Los pasos de este trabajo
+    steps:
+    
+    # Baja una copia del repositorio al runner
+    - name: Checkout the repository into the runner
+      uses: actions/checkout@v2
+
+    # Configura el JDK 11 para x64
+    - name: Set up JDK 11 for a x64 architecture
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        architecture: x64
+
+    # Usa caché para que en el futuro la acción corra más rápido
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    # Prueba la aplicación usando Maven
+    - name: Test application with Maven
+      run: mvn -B test --file pom.xml
+
+  # Este trabajo compila y empaqueta una aplicación de Java usando Maven
+  packaging:
+    
+    # Para poder ejecutar el trabajo, necesitamos primero el trabajo de pruebas, para no empaquetar aplicaciones con errores
+    # si no se especifica esta dependencia, los trabajos corren en paralelo
+    needs: [testing]
+    
+    # Corre en el runner de Ubuntu
+    # Para más información, ver: https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners
+    runs-on: ubuntu-latest
+    
+     # Los pasos de este trabajo
+    steps:
+    
+    # Baja una copia del repositorio al runner
+    - name: Checkout the repository into the runner
+      uses: actions/checkout@v2
+
+    # Configura el JDK 11 para x64
+    - name: Set up JDK 11 for a x64 architecture
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        architecture: x64
+
+    # Usa caché para que en el futuro la acción corra más rápido
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    # Empaqueta la aplicación usando Maven
+    - name: Build application with Maven
+      run: mvn -B package --file pom.xml
+    
+    # Guarda el JAR resultante como un artefacto de la acción
+    - name: Archive packaged jar as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: jar
+        path: target/*.jar
