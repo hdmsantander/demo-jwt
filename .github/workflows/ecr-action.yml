@@ -1,0 +1,57 @@
+name: ECR deployment
+on: [workflow_dispatch]
+jobs:
+  build:
+    # Corre en el runner de Ubuntu
+    # Para más info, ver: https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners
+    runs-on: ubuntu-latest
+
+    # Los pasos de este trabajo
+    steps:
+      # Baja una copia del repositorio al runner
+      - name: Checkout the repository into the runner
+        uses: actions/checkout@v2
+
+      # Configura el JDK 11 para x64
+      - name: Set up JDK 11 for a x64 architecture
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          architecture: x64
+
+      # Usa caché para que en el futuro la acción corra más rápido
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # Empaqueta la aplicación
+      - name: Package application
+        run: |
+          mvn -B install package --file pom.xml
+          rm target/*.original
+
+      # Configura credenciales de AWS, usa dos secretos del repositorio, AWS_ACCESS_KEY_ID y AWS_SECRET_ACCESS_KEY, ¡no poner credenciales en este archivo!
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      # Login a docker
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Construye contenedor, taggealo y empuja a ECR, usa un secreto del repositorio ECR, ¡no poner el repositorio de AWS aquí!
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR }}
+          ECR_REPOSITORY: tsis
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
