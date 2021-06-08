@@ -30,7 +30,7 @@ public class SwaggerConfig {
 	
 	private ApiInfo apiInfo() {
 	    return new ApiInfo(
-	      "Mi primer API REST", 
+	      "Mi primer API REST DevOps", 
 	      "Ejemplo de API del curso TSIS", 
 	      "API TOS", 
 	      "Terms of service", 
